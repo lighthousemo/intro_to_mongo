@@ -15,22 +15,53 @@ app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: false }));
 
 // TODO: Connect to a mongo db database
+// Require the mongo db client
+const MongoClient = require('mongodb').MongoClient;
+const url = 'mongodb://localhost:27017/tasks'; // tasks is the database name
+
+// This variable will hold the mongo database connection object.
+// This object is assigned later, in the Mongo connection callback.
+var db;
 
 // GET /tasks - display a list of all tasks
 app.get("/tasks", (req, res) => {
   // TODO: Get tasks from the database
+  db.collection('tasks').find({}).toArray(function(err, tasks) {
+    if(err) {
+      throw new Error("Could not connect to database");
+    }
 
-  // We want the tasks to show up on the tasks page.
-  res.render("tasks", { tasks: [] });
+    // We want the tasks to show up on the tasks page.
+    res.render("tasks", { tasks: tasks });
+  });
 });
 
 // POST /tasks - Called when the user submits the form that
 // adds a new task.
 app.post("/tasks", (req, res) => {
   // TODO: Add a new task to the database
+  const newTask = {description: req.body.description, done: false};
 
-  res.redirect("/tasks");
+  // Send the new task object to the mongo database
+  db.collection("tasks").insertOne(newTask, function(err, r) {
+    if(err) {
+      throw new Error("Could not insert task");
+    }
+
+    res.redirect("/tasks");
+  });
 });
 
+MongoClient.connect(url, function(err, dbConnection) {
+  if(err) {
+    console.log("Could not connect to mongo server", err);
+    return;
+  }
+  console.log("Connected successfully to the mongo server");
 
-app.listen(PORT);
+  db = dbConnection;
+
+  app.listen(PORT, function() {
+    console.log("Express server listening on port: " + PORT);
+  });
+});
