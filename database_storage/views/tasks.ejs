@@ -1,0 +1,17 @@
+<h1>Tasks</h1>
+
+<ul>
+  <% tasks.forEach(function(task) { %>
+    <% if(task.done) { %>
+      <li><%= task.description %> - DONE</li>
+    <% } else { %>
+      <li><%= task.description %> - NOT DONE</li>
+    <% } %>
+  <% }) %>
+</ul>
+
+<h3>Add a Task</h3>
+<form method="POST" action="/tasks">
+  <input type="text" name="description"/>
+  <input type="submit" name="Add Task"/>
+</form>
